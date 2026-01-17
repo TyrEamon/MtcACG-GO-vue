@@ -1067,18 +1067,18 @@ onBeforeUnmount(() => {
   content: '';
   position: absolute;
   top: 8px;
-  left: 2%;
-  right: 2%;
+  left: 0;
+  right: 0;
   height: 8px;
   border-radius: 999px;
   background: repeating-linear-gradient(
     135deg,
-    #ff9acb 0,
-    #ff9acb 14px,
-    #bfe9ff 14px,
-    #bfe9ff 28px,
-    #ffffff 28px,
-    #ffffff 42px
+    var(--detail-stripe-a) 0,
+    var(--detail-stripe-a) 14px,
+    var(--detail-stripe-b) 14px,
+    var(--detail-stripe-b) 28px,
+    var(--detail-stripe-c) 28px,
+    var(--detail-stripe-c) 42px
   );
   box-shadow: 0 6px 14px rgba(255, 154, 203, 0.25);
 }
