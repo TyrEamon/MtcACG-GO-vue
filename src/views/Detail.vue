@@ -644,6 +644,7 @@ onBeforeUnmount(() => {
   -webkit-overflow-scrolling: touch;
 }
 
+
 .left-viewer::-webkit-scrollbar { width: 8px; }
 .left-viewer::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.15);
@@ -756,6 +757,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   flex-shrink: 0;
 }
+
 
 /* 顶部标题卡 */
 .title-card { padding: 18px 18px 14px; }
@@ -966,7 +968,31 @@ onBeforeUnmount(() => {
 .action-link { text-decoration: none; }
 
 /* 推荐列表（保留你原来逻辑 + 去掉 hover transform 造成的“果冻感”已在你那边处理） */
-.recommendations { max-width: 100%; margin: 30px auto 0; padding: 0 12px; }
+.recommendations {
+  max-width: 100%;
+  margin: 30px auto 0;
+  padding: 30px 12px 0;
+  position: relative;
+}
+.recommendations::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 10%;
+  right: 10%;
+  height: 8px;
+  border-radius: 999px;
+  background: repeating-linear-gradient(
+    135deg,
+    #ff9acb 0,
+    #ff9acb 14px,
+    #bfe9ff 14px,
+    #bfe9ff 28px,
+    #ffffff 28px,
+    #ffffff 42px
+  );
+  box-shadow: 0 6px 14px rgba(255, 154, 203, 0.25);
+}
 .rec-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 .rec-title { font-size: 20px; color: var(--text-primary); font-weight: 700; margin: 0; }
 
