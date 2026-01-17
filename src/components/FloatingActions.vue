@@ -81,7 +81,7 @@ const scheduleResume = () => {
     if (!autoScroll.value) return
     isUserPaused = false
     maybeStartScroll()
-  }, 500)
+  }, 800)
 }
 
 const pauseForUser = () => {
@@ -137,7 +137,7 @@ const stepScroll = (timestamp) => {
     return
   }
 
-  const speed = 0.12
+  const speed = 0.08
   const move = delta * speed
   el.scrollTop += move
 
@@ -216,19 +216,27 @@ onBeforeUnmount(() => {
   flex-direction: column;
   gap: 12px;
   align-items: center;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.35s cubic-bezier(0.2, 1, 0.2, 1), transform 0.35s cubic-bezier(0.2, 1, 0.2, 1);
 }
 
 .floating-actions:not(.open) .action-stack {
   opacity: 0;
-  transform: translateY(8px) scale(0.98);
+  transform: translateY(10px) scale(0.96);
   pointer-events: none;
 }
 
+.floating-actions:not(.open) .action-stack .fab-btn {
+  transform: translateY(6px) scale(0.94);
+}
+
+.floating-actions.open .action-stack .fab-btn {
+  transform: translateY(0) scale(1);
+}
+
 .fab-btn {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
   border: none;
   cursor: pointer;
   display: inline-flex;
@@ -236,12 +244,12 @@ onBeforeUnmount(() => {
   justify-content: center;
   color: #fff;
   box-shadow: var(--fab-shadow);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.2, 1, 0.2, 1), box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .fab-btn svg {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   fill: currentColor;
 }
 
@@ -268,14 +276,17 @@ onBeforeUnmount(() => {
 
 .fab-btn.main {
   background: var(--fab-main);
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
 }
 
 .fab-btn.main:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.02);
 }
 
 .plus {
-  font-size: 24px;
+  font-size: 30px;
   font-weight: 700;
   line-height: 1;
   transition: transform 0.2s ease;
@@ -285,19 +296,35 @@ onBeforeUnmount(() => {
   transform: rotate(45deg);
 }
 
+.action-stack .fab-btn {
+  transition-delay: 0ms;
+}
+
+.floating-actions.open .action-stack .fab-btn:nth-child(1) { transition-delay: 40ms; }
+.floating-actions.open .action-stack .fab-btn:nth-child(2) { transition-delay: 80ms; }
+.floating-actions.open .action-stack .fab-btn:nth-child(3) { transition-delay: 120ms; }
+
 @media (max-width: 768px) {
   .floating-actions {
     right: 14px;
     bottom: 14px;
   }
   .fab-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
   }
   .fab-btn svg {
-    width: 22px;
-    height: 22px;
+    width: 18px;
+    height: 18px;
+  }
+  .fab-btn.main {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+  }
+  .plus {
+    font-size: 28px;
   }
 }
 </style>
