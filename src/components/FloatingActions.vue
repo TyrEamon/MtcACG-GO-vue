@@ -18,8 +18,8 @@
         title="Auto Scroll"
         @click="toggleAutoScroll"
       >
-        <svg v-if="autoScroll" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M8 6.5L18 12L8 17.5Z" />
+        <svg v-if="autoScroll" viewBox="0 0 24 24" aria-hidden="true" class="icon-stroke">
+          <path d="M9 6.5V17.5M15 6.5V17.5" />
         </svg>
         <svg v-else viewBox="0 0 24 24" aria-hidden="true" class="icon-stroke">
           <path d="M9 7.2L16.5 12L9 16.8Z" />
@@ -43,22 +43,89 @@ const autoScroll = ref(false)
 let rafId = 0
 let lastTime = 0
 let scrollEl = null
+let resumeTimer = 0
+let waitTimer = 0
+let waitingForMore = false
+let isUserPaused = false
 
 const getScrollElement = () => (
   scrollEl || document.scrollingElement || document.documentElement
 )
 
-const stopAutoScroll = () => {
-  autoScroll.value = false
-  lastTime = 0
+const cancelRaf = () => {
   if (rafId) {
     cancelAnimationFrame(rafId)
     rafId = 0
   }
 }
 
+const stopAutoScroll = () => {
+  autoScroll.value = false
+  lastTime = 0
+  waitingForMore = false
+  isUserPaused = false
+  if (resumeTimer) clearTimeout(resumeTimer)
+  if (waitTimer) clearTimeout(waitTimer)
+  cancelRaf()
+}
+
+const maybeStartScroll = () => {
+  if (!autoScroll.value || isUserPaused || waitingForMore) return
+  if (!rafId) rafId = requestAnimationFrame(stepScroll)
+}
+
+const scheduleResume = () => {
+  if (resumeTimer) clearTimeout(resumeTimer)
+  resumeTimer = setTimeout(() => {
+    resumeTimer = 0
+    if (!autoScroll.value) return
+    isUserPaused = false
+    maybeStartScroll()
+  }, 500)
+}
+
+const pauseForUser = () => {
+  if (!autoScroll.value) return
+  isUserPaused = true
+  lastTime = 0
+  cancelRaf()
+  scheduleResume()
+}
+
+const waitForMoreContent = () => {
+  const el = getScrollElement()
+  if (!el) {
+    stopAutoScroll()
+    return
+  }
+  if (waitTimer) return
+  waitingForMore = true
+  const baseHeight = el.scrollHeight
+
+  const check = () => {
+    waitTimer = 0
+    if (!autoScroll.value) {
+      waitingForMore = false
+      return
+    }
+
+    const currentHeight = el.scrollHeight
+    if (currentHeight > baseHeight + 2) {
+      waitingForMore = false
+      lastTime = 0
+      maybeStartScroll()
+      return
+    }
+
+    waitTimer = setTimeout(check, 300)
+  }
+
+  waitTimer = setTimeout(check, 300)
+}
+
 const stepScroll = (timestamp) => {
   if (!autoScroll.value) return
+  if (isUserPaused || waitingForMore) return
   if (!lastTime) lastTime = timestamp
 
   const delta = timestamp - lastTime
@@ -70,13 +137,13 @@ const stepScroll = (timestamp) => {
     return
   }
 
-  const speed = 0.22
+  const speed = 0.12
   const move = delta * speed
   el.scrollTop += move
 
   const maxTop = el.scrollHeight - el.clientHeight
   if (el.scrollTop >= maxTop - 2) {
-    stopAutoScroll()
+    waitForMoreContent()
     return
   }
 
@@ -89,9 +156,10 @@ const toggleAutoScroll = () => {
     return
   }
   autoScroll.value = true
+  waitingForMore = false
+  isUserPaused = false
   lastTime = 0
-  rafId = requestAnimationFrame(stepScroll)
-  open.value = false
+  maybeStartScroll()
 }
 
 const toggleOpen = () => {
@@ -100,22 +168,30 @@ const toggleOpen = () => {
 
 const handleBack = () => {
   stopAutoScroll()
-  open.value = false
   router.back()
 }
 
 const handleHome = () => {
   stopAutoScroll()
-  open.value = false
   router.push('/')
 }
 
 onMounted(() => {
-  scrollEl = document.querySelector('.main-content')
+  scrollEl = document.querySelector('.main-content') || document.scrollingElement
+  if (scrollEl) {
+    scrollEl.addEventListener('wheel', pauseForUser, { passive: true })
+    scrollEl.addEventListener('touchstart', pauseForUser, { passive: true })
+    scrollEl.addEventListener('touchmove', pauseForUser, { passive: true })
+  }
 })
 
 onBeforeUnmount(() => {
   stopAutoScroll()
+  if (scrollEl) {
+    scrollEl.removeEventListener('wheel', pauseForUser)
+    scrollEl.removeEventListener('touchstart', pauseForUser)
+    scrollEl.removeEventListener('touchmove', pauseForUser)
+  }
 })
 </script>
 
