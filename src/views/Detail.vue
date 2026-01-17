@@ -608,14 +608,12 @@ onBeforeUnmount(() => {
   --detail-stripe-a: #ff9acb;
   --detail-stripe-b: #bfe9ff;
   --detail-stripe-c: #ffffff;
-  --detail-card-bg: rgba(0, 0, 0, 0.18);
 }
 
 #app[data-theme="dark"] .detail-page {
   --detail-stripe-a: #d45d9d;
   --detail-stripe-b: #5aa1d6;
   --detail-stripe-c: #2c2c35;
-  --detail-card-bg: rgba(0, 0, 0, 0.18);
 }
 
 .detail-container {
@@ -658,19 +656,48 @@ onBeforeUnmount(() => {
   -webkit-overflow-scrolling: touch;
 }
 
-#app[data-theme="light"] .detail-page .left-viewer,
-#app[data-theme="dark"] .detail-page .left-viewer,
+#app[data-theme="light"] .detail-page .viewer-wrap,
+#app[data-theme="dark"] .detail-page .viewer-wrap,
 #app[data-theme="light"] .detail-page .panel-card,
 #app[data-theme="dark"] .detail-page .panel-card {
-  border: 4px solid transparent;
-  background:
-    linear-gradient(var(--detail-card-bg), var(--detail-card-bg)) padding-box,
-    repeating-linear-gradient(
-      135deg,
-      var(--detail-stripe-a) 0 14px,
-      var(--detail-stripe-b) 14px 28px,
-      var(--detail-stripe-c) 28px 42px
-    ) border-box;
+  position: relative;
+}
+
+#app[data-theme="light"] .detail-page .viewer-wrap::before,
+#app[data-theme="dark"] .detail-page .viewer-wrap::before,
+#app[data-theme="light"] .detail-page .panel-card::before,
+#app[data-theme="dark"] .detail-page .panel-card::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  padding: 4px;
+  border-radius: 18px;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--detail-stripe-a) 0 14px,
+    var(--detail-stripe-b) 14px 28px,
+    var(--detail-stripe-c) 28px 42px
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#app[data-theme="light"] .detail-page .panel-card::before,
+#app[data-theme="dark"] .detail-page .panel-card::before {
+  border-radius: 19px;
+}
+
+#app[data-theme="light"] .detail-page .viewer-wrap > *,
+#app[data-theme="dark"] .detail-page .viewer-wrap > *,
+#app[data-theme="light"] .detail-page .panel-card > *,
+#app[data-theme="dark"] .detail-page .panel-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .left-viewer::-webkit-scrollbar { width: 8px; }
