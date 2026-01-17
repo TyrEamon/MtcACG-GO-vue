@@ -98,14 +98,20 @@ const waitForMoreContent = () => {
     stopAutoScroll()
     return
   }
-  if (waitTimer) return
+  if (waitingForMore) return
   waitingForMore = true
+  lastTime = 0
+  cancelRaf()
   const baseHeight = el.scrollHeight
 
   const check = () => {
     waitTimer = 0
     if (!autoScroll.value) {
       waitingForMore = false
+      return
+    }
+    if (isUserPaused) {
+      waitTimer = setTimeout(check, 300)
       return
     }
 
