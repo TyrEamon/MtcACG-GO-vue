@@ -644,6 +644,18 @@ onBeforeUnmount(() => {
   -webkit-overflow-scrolling: touch;
 }
 
+#app[data-theme="light"] .detail-page .left-viewer {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)) padding-box,
+    repeating-linear-gradient(
+      135deg,
+      #ff9acb 0 14px,
+      #bfe9ff 14px 28px,
+      #ffffff 28px 42px
+    ) border-box;
+  box-shadow: 0 12px 24px rgba(255, 154, 203, 0.18);
+}
 
 .left-viewer::-webkit-scrollbar { width: 8px; }
 .left-viewer::-webkit-scrollbar-thumb {
@@ -758,6 +770,18 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
 }
 
+#app[data-theme="light"] .detail-page .panel-card {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)) padding-box,
+    repeating-linear-gradient(
+      135deg,
+      #ff9acb 0 14px,
+      #bfe9ff 14px 28px,
+      #ffffff 28px 42px
+    ) border-box;
+  box-shadow: 0 10px 22px rgba(255, 154, 203, 0.16);
+}
 
 /* 顶部标题卡 */
 .title-card { padding: 18px 18px 14px; }
@@ -952,13 +976,17 @@ onBeforeUnmount(() => {
   justify-content: center;
 
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 2px solid rgba(255, 255, 255, 0.18);
   color: #fff;
 
   cursor: pointer;
   transition: background 0.18s, border-color 0.18s, transform 0.18s;
 }
-.action-btn svg { width: 20px; height: 20px; }
+.action-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2.2;
+}
 .action-btn:hover:not(:disabled) {
   background: rgba(255,255,255,0.10);
   border-color: rgba(255,255,255,0.22);
@@ -966,6 +994,36 @@ onBeforeUnmount(() => {
 }
 .action-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .action-link { text-decoration: none; }
+
+.action-card .action-btn:nth-child(1) {
+  color: #ff8bc5;
+  border-color: rgba(255, 139, 197, 0.65);
+  background: rgba(255, 139, 197, 0.12);
+}
+.action-card .action-btn:nth-child(1):hover:not(:disabled) {
+  background: rgba(255, 139, 197, 0.2);
+  box-shadow: 0 8px 18px rgba(255, 139, 197, 0.32);
+}
+
+.action-card .action-btn:nth-child(2) {
+  color: #7fd3ff;
+  border-color: rgba(127, 211, 255, 0.65);
+  background: rgba(127, 211, 255, 0.12);
+}
+.action-card .action-btn:nth-child(2):hover:not(:disabled) {
+  background: rgba(127, 211, 255, 0.2);
+  box-shadow: 0 8px 18px rgba(127, 211, 255, 0.32);
+}
+
+.action-card .action-btn:nth-child(3) {
+  color: #b28cff;
+  border-color: rgba(178, 140, 255, 0.65);
+  background: rgba(178, 140, 255, 0.12);
+}
+.action-card .action-btn:nth-child(3):hover:not(:disabled) {
+  background: rgba(178, 140, 255, 0.2);
+  box-shadow: 0 8px 18px rgba(178, 140, 255, 0.32);
+}
 
 /* 推荐列表（保留你原来逻辑 + 去掉 hover transform 造成的“果冻感”已在你那边处理） */
 .recommendations {
@@ -978,8 +1036,8 @@ onBeforeUnmount(() => {
   content: '';
   position: absolute;
   top: 8px;
-  left: 10%;
-  right: 10%;
+  left: 6%;
+  right: 6%;
   height: 8px;
   border-radius: 999px;
   background: repeating-linear-gradient(
