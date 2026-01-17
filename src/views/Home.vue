@@ -322,7 +322,7 @@ watch(() => route.query.q, resetState)
 .home {
   position: relative;
   min-height: 100vh;
-  padding: 1rem;
+  padding: 0.5rem;
   padding-top: 40px;
 }
 
@@ -451,9 +451,9 @@ watch(() => route.query.q, resetState)
 /* ✅ 新瀑布流样式 (保持原样) */
 .masonry-container {
   width: 100%;
-  max-width: 1600px;
+  max-width: none;
   margin: 0 auto;
-  padding: 0 8px;
+  padding: 0 clamp(4px, 0.8vw, 10px);
 }
 
 .masonry-grid {
@@ -626,7 +626,7 @@ watch(() => route.query.q, resetState)
 /* ✅ 响应式 */
 @media (max-width: 768px) {
   .home {
-    padding: 0.5rem;
+    padding: 0.35rem;
     padding-top: 15px;
   }
   .masonry-grid {
