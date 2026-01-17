@@ -644,11 +644,6 @@ onBeforeUnmount(() => {
   -webkit-overflow-scrolling: touch;
 }
 
-#app[data-theme="light"] .detail-page .left-viewer {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(255, 105, 180, 0.35);
-  box-shadow: 0 12px 26px rgba(255, 105, 180, 0.18);
-}
 
 .left-viewer::-webkit-scrollbar { width: 8px; }
 .left-viewer::-webkit-scrollbar-thumb {
@@ -763,11 +758,6 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
 }
 
-#app[data-theme="light"] .detail-page .panel-card {
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(255, 105, 180, 0.28);
-  box-shadow: 0 10px 24px rgba(255, 105, 180, 0.16);
-}
 
 /* 顶部标题卡 */
 .title-card { padding: 18px 18px 14px; }
@@ -981,18 +971,27 @@ onBeforeUnmount(() => {
 .recommendations {
   max-width: 100%;
   margin: 30px auto 0;
-  padding: 26px 12px 0;
+  padding: 30px 12px 0;
   position: relative;
 }
 .recommendations::before {
   content: '';
   position: absolute;
-  top: 6px;
-  left: 12px;
-  right: 12px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
-  opacity: 0.5;
+  top: 8px;
+  left: 10%;
+  right: 10%;
+  height: 8px;
+  border-radius: 999px;
+  background: repeating-linear-gradient(
+    135deg,
+    #ff9acb 0,
+    #ff9acb 14px,
+    #bfe9ff 14px,
+    #bfe9ff 28px,
+    #ffffff 28px,
+    #ffffff 42px
+  );
+  box-shadow: 0 6px 14px rgba(255, 154, 203, 0.25);
 }
 .rec-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 .rec-title { font-size: 20px; color: var(--text-primary); font-weight: 700; margin: 0; }

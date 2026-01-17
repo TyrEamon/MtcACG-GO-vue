@@ -163,8 +163,8 @@ const filteredPosts = computed(() => posts.value.filter(isR18Content))
 const getColumnCount = () => {
   const width = window.innerWidth
   if (width < 768) return 2
-  if (width < 1024) return 3
-  return 4
+  if (width < 1200) return 4
+  return 5
 }
 
 const columnCount = ref(getColumnCount())
