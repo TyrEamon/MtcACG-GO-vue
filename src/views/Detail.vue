@@ -644,17 +644,38 @@ onBeforeUnmount(() => {
   -webkit-overflow-scrolling: touch;
 }
 
-#app[data-theme="light"] .detail-page .left-viewer {
-  border: 2px solid transparent;
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)) padding-box,
-    repeating-linear-gradient(
-      135deg,
-      #ff9acb 0 14px,
-      #bfe9ff 14px 28px,
-      #ffffff 28px 42px
-    ) border-box;
-  box-shadow: 0 12px 24px rgba(255, 154, 203, 0.18);
+#app[data-theme="light"] .detail-page .left-viewer,
+#app[data-theme="dark"] .detail-page .left-viewer {
+  position: relative;
+}
+#app[data-theme="light"] .detail-page .left-viewer::before,
+#app[data-theme="dark"] .detail-page .left-viewer::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  padding: 4px;
+  border-radius: 18px;
+  background: repeating-linear-gradient(
+    135deg,
+    #ff9acb 0 14px,
+    #bfe9ff 14px 28px,
+    #ffffff 28px 42px
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+#app[data-theme="dark"] .detail-page .left-viewer::before {
+  background: repeating-linear-gradient(
+    135deg,
+    #d45d9d 0 14px,
+    #5aa1d6 14px 28px,
+    #2c2c35 28px 42px
+  );
+  opacity: 0.75;
 }
 
 .left-viewer::-webkit-scrollbar { width: 8px; }
@@ -770,17 +791,38 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
 }
 
-#app[data-theme="light"] .detail-page .panel-card {
-  border: 2px solid transparent;
-  background:
-    linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)) padding-box,
-    repeating-linear-gradient(
-      135deg,
-      #ff9acb 0 14px,
-      #bfe9ff 14px 28px,
-      #ffffff 28px 42px
-    ) border-box;
-  box-shadow: 0 10px 22px rgba(255, 154, 203, 0.16);
+#app[data-theme="light"] .detail-page .panel-card,
+#app[data-theme="dark"] .detail-page .panel-card {
+  position: relative;
+}
+#app[data-theme="light"] .detail-page .panel-card::before,
+#app[data-theme="dark"] .detail-page .panel-card::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  padding: 4px;
+  border-radius: 19px;
+  background: repeating-linear-gradient(
+    135deg,
+    #ff9acb 0 14px,
+    #bfe9ff 14px 28px,
+    #ffffff 28px 42px
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+#app[data-theme="dark"] .detail-page .panel-card::before {
+  background: repeating-linear-gradient(
+    135deg,
+    #d45d9d 0 14px,
+    #5aa1d6 14px 28px,
+    #2c2c35 28px 42px
+  );
+  opacity: 0.75;
 }
 
 /* 顶部标题卡 */
@@ -1036,8 +1078,8 @@ onBeforeUnmount(() => {
   content: '';
   position: absolute;
   top: 8px;
-  left: 6%;
-  right: 6%;
+  left: 3%;
+  right: 3%;
   height: 8px;
   border-radius: 999px;
   background: repeating-linear-gradient(
