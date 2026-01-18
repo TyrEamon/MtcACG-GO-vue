@@ -1,114 +1,97 @@
-# MtcACG Vue 版
+# MtcACG Vue
 
-Vue 3 + Vite 重构的图像站前端，面向 Cloudflare Pages 部署。后端 API 运行在 Cloudflare Workers/D1，接口约定见本文与 `workers/BACKEND_GUIDE.md`。
+二次元图像站前端（Vue 3 + Vite），后端采用 Cloudflare Workers/D1。  
+推荐“同仓库、分开部署”：前端用 Pages，后端用 Workers，各自独立发布。
 
-## 技术栈
-- 前端：Vue 3、Vue Router、Vite
-- 后端：Cloudflare Workers、D1 Database
-- 部署：Cloudflare Pages
-
-## 目录结构
+## 目录结构（同仓库推荐）
 ```
-mtcacg-vue/
-├── index.html
-├── package.json
-├── vite.config.js
-├── public/
-│   └── _redirects          # SPA 路由支持
-├── src/
-│   ├── main.js
-│   ├── App.vue
-│   ├── router/
-│   │   └── index.js
-│   ├── components/
-│   │   ├── Sidebar.vue
-│   │   └── FloatingActions.vue
-│   └── views/
-│       ├── Home.vue
-│       ├── Detail.vue
-│       ├── Artists.vue
-│       ├── ArtistProfile.vue
-│       ├── About.vue
-│       └── R18.vue
-└── workers/
-    └── BACKEND_GUIDE.md    # 后端对接说明
+vue框架完善（1.17）/
+├─ index.html
+├─ package.json
+├─ vite.config.js
+├─ public/
+│  └─ _redirects
+├─ src/
+│  ├─ App.vue
+│  ├─ main.js
+│  ├─ components/
+│  └─ views/
+└─ workers/                 # 后端 worker 放这里（同仓库方式）
+   ├─ wrangler.toml
+   ├─ src/
+   └─ BACKEND_GUIDE.md
 ```
 
-## 快速开始
-### 1) 安装依赖
+如果你当前后端在 `C:\Users\Tyr.Eamon\Desktop\mtccg-vue-后端worker`，  
+建议复制/移动到本项目的 `workers/` 目录里统一管理（部署仍然分开）。
+
+## 本地开发
+
+### 1) 前端启动
 ```bash
 npm install
-```
-
-### 2) 本地开发
-```bash
 npm run dev
 ```
 访问 `http://localhost:5173`。
 
-### 3) 构建生产版本
+### 2) 后端本地（可选）
+进入 `workers/` 后运行：
 ```bash
-npm run build
+npm install
+npm run dev
+# 或
+wrangler dev
 ```
-输出在 `dist/`。
+若端口不是 `8787`，请同步修改 `vite.config.js` 里的代理配置。
 
-### 4) 本地预览构建结果（可选）
+## 生产部署
+
+### A. 前端：Cloudflare Pages
+1. Dashboard → Pages → 新建项目 → 绑定 Git 仓库  
+2. 构建设置  
+   - Build command: `npm run build`  
+   - Output directory: `dist`  
+   - Node 版本：18+  
+3. 部署完成后访问你的 Pages 域名。
+
+### B. 后端：Cloudflare Workers
+在 `workers/` 目录执行：
 ```bash
-npm run preview
+npm install
+npx wrangler login
+npx wrangler deploy
 ```
 
-## 本地联调说明
-默认代理在 `vite.config.js`：
-```
-/api    -> http://localhost:8787
-/image  -> http://localhost:8787
-```
-如果你的 Workers 本地端口不同，请修改 `vite.config.js` 的 `server.proxy`。
-
-## 部署到 Cloudflare Pages
-### 方法 A：Dashboard
-1. 登录 Cloudflare Dashboard
-2. Pages → 新建项目，连接 Git 仓库
-3. 构建设置：
-   - 构建命令：`npm run build`
-   - 输出目录：`dist`
-   - Node 版本：18+
-4. 保存并部署
-
-### 方法 B：Wrangler CLI
+如果需要 D1：
 ```bash
-npm install -g wrangler
-wrangler login
-npm run build
-wrangler pages deploy dist --project-name=mtcacg
+npx wrangler d1 create <db-name>
+npx wrangler d1 migrations apply <db-name>
 ```
+并在 `wrangler.toml` 中绑定 `DB`。
 
-## 后端 API 说明
-本仓库仅包含前端。后端改动与 API 约定请查看：
-- `workers/BACKEND_GUIDE.md`
+### C. 绑定同域路由（推荐）
+为了让前端直接访问 `/api`、`/image`：
+1. 在 Cloudflare Workers 里给你的 Worker 添加路由，例如  
+   - `https://你的-pages域名/api/*`  
+   - `https://你的-pages域名/image/*`
+2. 前端代码保持使用相对路径 `/api`、`/image`，无需改动。
 
-前端依赖的主要接口（示例）：
-- `GET /api/posts`（支持 `q/page/limit/sort`）
-- `GET /api/detail/:id`
-- `GET /api/artists`（支持 `format=json/page/q`）
-- `GET /api/artist/:name`（支持 `page/limit`）
-- `GET /api/bg_safe?type=image`
-- `GET /image/:file_name`
-
-## 环境变量（Pages/Workers）
-根据后端配置设置：
+## 环境变量（Workers）
+按后端需要配置（示例）：
 - `BOT_TOKEN`：Telegram Bot Token（图片代理）
-- `DB`：D1 数据库绑定
+- `DB`：D1 数据库绑定名
 
 ## 常见问题
-### 刷新后 404
-确认 `public/_redirects` 存在且内容为：
+
+### 1) 刷新后 404
+确认 `public/_redirects` 内容为：
 ```
 /*    /index.html   200
 ```
 
-### 本地 API 404
-确认 Workers 已运行，并检查 `vite.config.js` 代理地址。
+### 2) 本地 API 404
+确认 Worker 正在运行，并检查 `vite.config.js` 的 `server.proxy`。
 
-## 许可证
-本项目仅供学习交流使用，图片版权归原作者所有。
+## 后端接口说明
+详细接口与字段说明见：`workers/BACKEND_GUIDE.md`
+
