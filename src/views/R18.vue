@@ -11,10 +11,10 @@
     <div class="warning-overlay" v-if="!confirmed">
       <div class="warning-box" @click.stop>
         <h1>🔞 成人内容警告</h1>
-        <p>你即将进入包�?R-18 内容的区�?/p>
+        <p>你即将进入包�?R-18 内容的区�?</p>
         <p>请确认你已年�?18 周岁</p>
         <div class="warning-actions">
-          <button @click="confirmAge" class="btn-confirm">我已�?18 �?/button>
+          <button @click="confirmAge" class="btn-confirm">我已�?18 �?</button>
           <button @click="$router.push('/')" class="btn-cancel">返回首页</button>
         </div>
       </div>
@@ -22,7 +22,7 @@
 
     <div v-if="confirmed" class="r18-content">
       <div class="content-header">
-        <h1>🔞 里世�?/h1>
+        <h1>🔞 里世�?</h1>
         <p>但还是要保持绅士风度�?(/ω�?</p>
       </div>
 
