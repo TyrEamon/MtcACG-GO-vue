@@ -93,11 +93,6 @@ const tipText = ref('加载中...')
 
 const showWelcome = ref(false)
 const isLowEndDevice = ref(false)
-const MIN_SAFE_COUNT = 20
-const MAX_AUTO_PAGES = 4
-
-let pendingLoadMore = false
-let autoFillAttempts = 0
 const scrollSentinel = ref(null)
 
 const getColumnCount = () => {
@@ -226,6 +221,17 @@ const loadPosts = async (append = false) => {
 
       addItems(incoming)
 
+      // ✅ 过滤开启时：如果过滤后太少，就自动多拉几页补足（保留你原逻辑）
+      if (shouldHideR18) {
+        const filteredCount = posts.value.filter(p => !isR18Content(p)).length
+        if (filteredCount < 20 && data && data.length >= 30) {
+          setTimeout(() => {
+            page.value++
+            loadPosts(true)
+          }, 100)
+          return
+        }
+      }
     } else {
       posts.value = data || []
       reset()
@@ -252,52 +258,19 @@ const loadPosts = async (append = false) => {
     if (!append) posts.value = []
   } finally {
     loading.value = false
-    if (pendingLoadMore) {
-      pendingLoadMore = false
-      requestMore()
-      return
-    }
-    maybeAutoFill()
   }
-}
-
-function requestMore() {
-  if (loading.value) {
-    pendingLoadMore = true
-    return
-  }
-  if (!hasMore.value) return
-  page.value++
-  loadPosts(true)
-}
-
-function maybeAutoFill() {
-  const hide = localStorage.getItem('hide_r18')
-  const shouldHideR18 = hide === null ? true : hide === 'true'
-  if (!shouldHideR18 || !hasMore.value) {
-    autoFillAttempts = 0
-    return
-  }
-  const filteredCount = posts.value.filter(p => !isR18Content(p)).length
-  if (filteredCount >= MIN_SAFE_COUNT) {
-    autoFillAttempts = 0
-    return
-  }
-  if (autoFillAttempts >= MAX_AUTO_PAGES) return
-  autoFillAttempts++
-  requestMore()
 }
 
 const loadMore = () => {
-  requestMore()
+  if (loading.value || !hasMore.value) return
+  page.value++
+  loadPosts(true)
 }
 
 const resetState = () => {
   page.value = 1
   posts.value = []
   hasMore.value = true
-  pendingLoadMore = false
-  autoFillAttempts = 0
   reset()
   loadPosts()
 }
@@ -653,7 +626,7 @@ watch(() => route.query.q, resetState)
 /* ✅ 响应式 */
 @media (max-width: 768px) {
   .home {
-    padding: 0.5rem;
+    padding: 0.35rem;
     padding-top: 15px;
   }
   .masonry-grid {

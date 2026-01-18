@@ -11,10 +11,10 @@
     <div class="warning-overlay" v-if="!confirmed">
       <div class="warning-box" @click.stop>
         <h1>🔞 成人内容警告</h1>
-        <p>你即将进入包�?R-18 内容的区�?</p>
-        <p>请确认你已年�?18 周岁</p>
+        <p>你即将进入包含 R-18 内容的区域</p>
+        <p>请确认你已年满 18 周岁</p>
         <div class="warning-actions">
-          <button @click="confirmAge" class="btn-confirm">我已�?18 �?</button>
+          <button @click="confirmAge" class="btn-confirm">我已满 18 岁</button>
           <button @click="$router.push('/')" class="btn-cancel">返回首页</button>
         </div>
       </div>
@@ -22,11 +22,11 @@
 
     <div v-if="confirmed" class="r18-content">
       <div class="content-header">
-        <h1>🔞 里世�?</h1>
-        <p>但还是要保持绅士风度�?(/ω�?</p>
+        <h1>🔞 里世界</h1>
+        <p>但还是要保持绅士风度哦 (/ω＼)</p>
       </div>
 
-      <!-- 首页同款瀑布�?-->
+      <!-- 首页同款瀑布流 -->
       <div class="masonry-container" v-if="filteredPosts.length > 0">
         <div class="masonry-grid">
           <div v-for="(column, index) in columns" :key="index" class="masonry-column">
@@ -40,14 +40,14 @@
                 <div :class="['skeleton', isLowEndDevice ? 'skeleton-simple' : 'skeleton-fancy']"></div>
                 <img
                   :src="`/image/${post.file_name}`"
-                  :alt="post.caption || 'Untitled'"
+                  :alt="post.caption || '无标题'"
                   loading="lazy"
                   @load="handleImageLoad"
                 />
               </div>
 
               <div class="overlay">
-                <p class="caption">{{ (post.caption || 'Untitled').split('\n')[0] }}</p>
+                <p class="caption">{{ (post.caption || '无标题').split('\n')[0] }}</p>
                 <p class="artist" v-if="post.artist">👤 {{ post.artist }}</p>
               </div>
             </div>
@@ -63,7 +63,7 @@
         {{ tipText }}
       </div>
 
-      <!-- 空状�?-->
+      <!-- 空状态 -->
       <div v-if="!loading && filteredPosts.length === 0" class="empty">
         <p>😢</p>
         <p>暂无 R18 内容</p>
@@ -88,15 +88,10 @@ const page = ref(1)
 const hasMore = ref(true)
 
 const tipOpacity = ref(0)
-const tipText = ref('加载�?..')
+const tipText = ref('加载中...')
 const scrollSentinel = ref(null)
 
 const isLowEndDevice = ref(false)
-const MIN_R18_COUNT = 18
-const MAX_AUTO_PAGES = 6
-
-let pendingLoadMore = false
-let autoFillAttempts = 0
 
 const showTip = (text, duration = 2000) => {
   tipText.value = text
@@ -108,7 +103,7 @@ const showTip = (text, duration = 2000) => {
   }
 }
 
-// 设备性能检�?
+// 设备性能检测
 const detectDevicePerformance = () => {
   const cores = navigator.hardwareConcurrency || 2
   const memory = navigator.deviceMemory || 4
@@ -125,46 +120,46 @@ const detectDevicePerformance = () => {
     effectiveType === '3g'
   ) {
     isLowEndDevice.value = true
-    console.log('🐌 检测到低端设备，启用轻量模�?)
+    console.log('🐌 检测到低端设备，启用轻量模式')
   } else {
-    console.log('🚀 检测到高性能设备，启用高级动�?)
+    console.log('🚀 检测到高性能设备，启用高级动画')
   }
 }
 
-// �?R18 关键词：里世界“只看命中词”的依据
+// ✅ R18 关键词：里世界“只看命中词”的依据
 const R18_KEYWORDS = [
   'R-18', 'R18', 'NSFW', 'Hentai',
   '性爱', '性交', '乱伦', '裸胸', '露点', '调教',
-  '触手', '高潮', '喷水', '阿黑�?, '颜射', '后宫', '痴汉',
+  '触手', '高潮', '喷水', '阿黑颜', '颜射', '后宫', '痴汉',
   'NTR', '3P', 'Boobs', 'Tits', 'Nipples', 'Breast',
   '乳房', '乳头', '胸部', '巨乳', '爆乳',
   'Creampie', 'Cum', 'Bukkake', 'Sex', 'Fuck', 'Blowjob',
   '射精', 'Handjob', 'Paizuri',
   '乳交', 'Cunnilingus', 'Fellatio', 'Masturbation',
   'Pussy', 'Vagina', 'Penis', 'Dick', 'Cock', 'Genitals', 'Pubic',
-  '阴部', '生殖�?, '阴茎', '阴道', '私处', '下体',
+  '阴部', '生殖器', '阴茎', '阴道', '私处', '下体',
   'Breast', 'Nude', 'Topless', 'Ahegao', '潮吹',
   'X-ray', '透视', 'Mind Break', '精神崩溃',
-  '洗脑', '堕落', 'Futa', '扶她', '双�?,
+  '洗脑', '堕落', 'Futa', '扶她', '双性',
   'Tentacle', 'BDSM', 'Bondage', '捆绑', '束缚',
-  'Scat', 'Pregnant', '怀�?, '孕妇',
-  '丝袜', '内衣', '泳装', '比基�?,
-  'School Swimsuit', '死库�?, 'Maid', 'Swimsuit', 'Ass',
-  '臀�?, '屁股', 'Pantyhose', 'Garter', '吊带�?,
-  'Lingerie', 'Panty', 'Stockings', '丁字�?,
-  '内裤', '胖次', '情趣内衣', '透视�?,
+  'Scat', 'Pregnant', '怀孕', '孕妇',
+  '丝袜', '内衣', '泳装', '比基尼',
+  'School Swimsuit', '死库水', 'Maid', 'Swimsuit', 'Ass',
+  '臀部', '屁股', 'Pantyhose', 'Garter', '吊带袜',
+  'Lingerie', 'Panty', 'Stockings', '丁字裤',
+  '内裤', '胖次', '情趣内衣', '透视装',
   'naked', 'nipples', 'anus', '肛门', '菊花'
 ]
 
 const isR18Content = (post) => {
-  const text = `${post.caption || 'Untitled'} ${post.tags || ''}`.toLowerCase()
+  const text = `${post.caption || ''} ${post.tags || ''}`.toLowerCase()
   return R18_KEYWORDS.some((keyword) => text.includes(keyword.toLowerCase()))
 }
 
-// 里世界：只展示命中关键词的内�?
+// 里世界：只展示命中关键词的内容
 const filteredPosts = computed(() => posts.value.filter(isR18Content))
 
-// 瀑布流列�?
+// 瀑布流列数
 const getColumnCount = () => {
   const width = window.innerWidth
   if (width < 768) return 2
@@ -216,13 +211,22 @@ const loadPosts = async (append = false) => {
       params: { q, page: page.value }
     })
 
-    console.log(`📦 R18 �?${page.value} 页加载了 ${data?.length || 0} 条`)
+    console.log(`📦 R18 第 ${page.value} 页加载了 ${data?.length || 0} 条`)
 
     if (append) {
       posts.value.push(...(data || []))
 
       const filteredNew = (data || []).filter(isR18Content)
       addItems(filteredNew)
+
+      if (filteredNew.length < 12 && data && data.length >= 30) {
+        console.log('⚠️ 本页命中 R18 太少，自动尝试下一页...')
+        setTimeout(() => {
+          page.value++
+          loadPosts(true)
+        }, 120)
+        return
+      }
     } else {
       posts.value = data || []
       reset()
@@ -234,56 +238,29 @@ const loadPosts = async (append = false) => {
       showTip('📦 已经到底啦！没有更多内容了~', 3000)
     } else if (data.length < 30) {
       hasMore.value = false
-      showTip(`已加载全�?R18 内容（当前命�?${filteredPosts.value.length} 条）✨`, 2500)
+      showTip(`已加载全部 R18 内容（当前命中 ${filteredPosts.value.length} 条）✨`, 2500)
     } else {
       tipOpacity.value = 0
     }
   } catch (err) {
-    console.error('�?加载失败:', err)
-    showTip('�?加载失败，请稍后重试', 3000)
+    console.error('❌ 加载失败:', err)
+    showTip('❌ 加载失败，请稍后重试', 3000)
     if (!append) posts.value = []
   } finally {
     loading.value = false
-    if (pendingLoadMore) {
-      pendingLoadMore = false
-      requestMore()
-      return
-    }
-    maybeAutoFill()
   }
-}
-
-function requestMore() {
-  if (loading.value) {
-    pendingLoadMore = true
-    return
-  }
-  if (!hasMore.value) return
-  page.value++
-  loadPosts(true)
-}
-
-function maybeAutoFill() {
-  if (!confirmed.value || !hasMore.value) return
-  if (filteredPosts.value.length >= MIN_R18_COUNT) {
-    autoFillAttempts = 0
-    return
-  }
-  if (autoFillAttempts >= MAX_AUTO_PAGES) return
-  autoFillAttempts++
-  requestMore()
 }
 
 const loadMore = () => {
-  requestMore()
+  if (loading.value || !hasMore.value) return
+  page.value++
+  loadPosts(true)
 }
 
 const resetState = () => {
   page.value = 1
   posts.value = []
   hasMore.value = true
-  pendingLoadMore = false
-  autoFillAttempts = 0
   reset()
   loadPosts(false)
 }
@@ -315,7 +292,7 @@ const setupObserver = async () => {
   )
 
   observer.observe(scrollSentinel.value)
-  console.log('�?R18 IntersectionObserver 已启�?)
+  console.log('✅ R18 IntersectionObserver 已启动')
 }
 
 const confirmAge = async () => {
@@ -352,7 +329,7 @@ watch(() => route.query.q, () => {
 </script>
 
 <style scoped>
-/* —�?你的样式原封不动 —�?*/
+/* —— 你的样式原封不动 —— */
 .r18 {
   position: relative;
   min-height: 100vh;
@@ -370,7 +347,7 @@ watch(() => route.query.q, () => {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  filter: blur(10px) brightness(0.7); /* 轻微模糊，增加亮�?*/
+  filter: blur(10px) brightness(0.7); /* 轻微模糊，增加亮度 */
   z-index: -1;
   opacity: 1;
   pointer-events: none;
@@ -451,7 +428,7 @@ watch(() => route.query.q, () => {
 }
 .btn-cancel:hover { background: #e0e0e0; }
 
-/* 内容�?*/
+/* 内容区 */
 .r18-content {
   padding: 0.5rem;
   padding-top: 18px;
@@ -474,7 +451,7 @@ watch(() => route.query.q, () => {
   color: rgba(255,255,255,0.75);
 }
 
-/* 首页同款瀑布流样�?*/
+/* 首页同款瀑布流样式 */
 .masonry-container {
   width: 100%;
   margin: 0 auto;
@@ -638,7 +615,7 @@ watch(() => route.query.q, () => {
 }
 .empty p:first-child { font-size: 3rem; }
 
-/* 响应�?*/
+/* 响应式 */
 @media (max-width: 768px) {
   .r18-content {
     padding: 0.35rem;
@@ -650,7 +627,6 @@ watch(() => route.query.q, () => {
   .warning-box h1 { font-size: 1.5rem; }
 }
 </style>
-
 
 
 
