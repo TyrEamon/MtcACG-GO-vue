@@ -692,8 +692,11 @@ onBeforeUnmount(() => {
   border-radius: 19px;
 }
 
-#app[data-theme="light"] .detail-page .viewer-wrap > *,
-#app[data-theme="dark"] .detail-page .viewer-wrap > *,
+#app[data-theme="light"] .detail-page .viewer-wrap > .left-viewer,
+#app[data-theme="dark"] .detail-page .viewer-wrap > .left-viewer {
+  z-index: 1;
+}
+
 #app[data-theme="light"] .detail-page .panel-card > *,
 #app[data-theme="dark"] .detail-page .panel-card > * {
   position: relative;
