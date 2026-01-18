@@ -44,18 +44,19 @@ wrangler dev
 ```
 若端口不是 `8787`，请同步修改 `vite.config.js` 里的代理配置。
 
-## 生产部署
+## Cloudflare 部署
 
-### A. 前端：Cloudflare Pages
-1. Dashboard → Pages → 新建项目 → 绑定 Git 仓库  
-2. 构建设置  
+### 1) 前端：Cloudflare Pages
+1. Cloudflare Dashboard → Pages → Create a project  
+2. 连接此仓库  
+3. 构建设置  
    - Build command: `npm run build`  
    - Output directory: `dist`  
-   - Node 版本：18+  
-3. 部署完成后访问你的 Pages 域名。
+   - Node version: 18+  
+4. 部署完成后得到一个 Pages 域名
 
-### B. 后端：Cloudflare Workers
-在 `workers/` 目录执行：
+### 2) 后端：Cloudflare Workers
+进入 `workers/` 目录执行：
 ```bash
 npm install
 npx wrangler login
@@ -69,9 +70,9 @@ npx wrangler d1 migrations apply <db-name>
 ```
 并在 `wrangler.toml` 中绑定 `DB`。
 
-### C. 绑定同域路由（推荐）
+### 3) 绑定同域路由（推荐）
 为了让前端直接访问 `/api`、`/image`：
-1. 在 Cloudflare Workers 里给你的 Worker 添加路由，例如  
+1. 在 Workers → Routes 添加  
    - `https://你的-pages域名/api/*`  
    - `https://你的-pages域名/image/*`
 2. 前端代码保持使用相对路径 `/api`、`/image`，无需改动。
@@ -94,4 +95,3 @@ npx wrangler d1 migrations apply <db-name>
 
 ## 后端接口说明
 详细接口与字段说明见：`workers/BACKEND_GUIDE.md`
-
