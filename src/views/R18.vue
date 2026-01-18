@@ -40,14 +40,14 @@
                 <div :class="['skeleton', isLowEndDevice ? 'skeleton-simple' : 'skeleton-fancy']"></div>
                 <img
                   :src="`/image/${post.file_name}`"
-                  :alt="post.caption || '无标�?"
+                  :alt="post.caption || 'Untitled'"
                   loading="lazy"
                   @load="handleImageLoad"
                 />
               </div>
 
               <div class="overlay">
-                <p class="caption">{{ (post.caption || '无标�?).split('\n')[0] }}</p>
+                <p class="caption">{{ (post.caption || 'Untitled').split('\n')[0] }}</p>
                 <p class="artist" v-if="post.artist">👤 {{ post.artist }}</p>
               </div>
             </div>
@@ -157,7 +157,7 @@ const R18_KEYWORDS = [
 ]
 
 const isR18Content = (post) => {
-  const text = `${post.caption || ''} ${post.tags || ''}`.toLowerCase()
+  const text = `${post.caption || 'Untitled'} ${post.tags || ''}`.toLowerCase()
   return R18_KEYWORDS.some((keyword) => text.includes(keyword.toLowerCase()))
 }
 
