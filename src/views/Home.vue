@@ -3,13 +3,21 @@
     <!-- ❌ 已删除 .hero-bg，背景现在由 App.vue 统一管理 -->
 
     <!-- 首次访问弹窗 -->
-    <NoticeToast
-      v-if="showWelcome"
-      storage-key="mtcacg_visited"
-      title="欢迎来到 MtcACG！(≧∇≦)ﾉ"
-      :message="homeNoticeMessage"
-      :actions="homeNoticeActions"
-    />
+    <div class="welcome-modal" v-if="showWelcome" @click="closeWelcome">
+      <div class="modal-content" @click.stop>
+        <button class="close-btn" @click="closeWelcome">×</button>
+        <h1>欢迎来到 MtcACG！(≧∇≦)ﾉ</h1>
+        <p>在乱糟糟的互联网异世界里，这里是本站长偷偷搭建的"秘密基地"</p>
+        <p class="description">
+          这里没有算法裹挟，只有我的私人凝视。每一张图，都是我从时间里切下的碎片，安放于此。
+        </p>
+        <div class="api-links">
+          <code>/api/posts?q=random</code>
+          <code>/api/bg_safe?type=image</code>
+        </div>
+        <button class="enter-btn" @click="closeWelcome">进入探索 →</button>
+      </div>
+    </div>
 
     <!-- ✅ 瀑布流结构 (保持原样) -->
     <div class="masonry-container" v-if="filteredPosts.length > 0">
@@ -67,7 +75,6 @@ import { ref, computed, onMounted, onUnmounted, watch, inject } from 'vue' // �
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { useMasonry } from '../composables/useMasonry'
-import NoticeToast from '../components/NoticeToast.vue'
 
 const route = useRoute()
 
@@ -87,21 +94,6 @@ const tipText = ref('加载中...')
 const showWelcome = ref(false)
 const isLowEndDevice = ref(false)
 const scrollSentinel = ref(null)
-
-const closeWelcome = () => {
-  showWelcome.value = false
-  localStorage.setItem('mtcacg_visited', 'true')
-}
-
-const homeNoticeMessage = [
-  '在乱糟糟的互联网异世界里，这里是本站长偷偷搭建的"秘密基地"',
-  '这里没有算法裹挟，只有我的私人凝视。每一张图，都是我从时间里切下的碎片，安放于此。',
-  '/api/posts?q=random',
-  '/api/bg_safe?type=image'
-]
-const homeNoticeActions = [
-  { label: '进入探索 →', variant: 'primary', onClick: () => closeWelcome() }
-]
 
 const getColumnCount = () => {
   const width = window.innerWidth
@@ -169,6 +161,11 @@ const filteredPosts = computed(() => {
   if (shouldHideR18) return posts.value.filter(post => !isR18Content(post))
   return posts.value
 })
+
+const closeWelcome = () => {
+  showWelcome.value = false
+  localStorage.setItem('mtcacg_visited', 'true')
+}
 
 const getAspectRatio = (post) => {
   if (post.width && post.height) {
@@ -329,16 +326,19 @@ watch(() => route.query.q, resetState)
   padding-top: 40px;
 }
 
+/* ❌ 已删除 .hero-bg 和 @keyframes fadeIn */
+
 .welcome-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(20px);
-  z-index: 9999;
+  background: transparent;
+  backdrop-filter: none;
+  z-index: 900;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 20px;
+  pointer-events: auto;
   animation: fadeIn 0.3s ease-out;
 }
 
@@ -348,39 +348,35 @@ watch(() => route.query.q, resetState)
 }
 
 .modal-content {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 3rem 2.5rem;
-  border-radius: 24px;
-  max-width: 600px;
-  width: 100%;
-  text-align: center;
+  background: rgba(14, 20, 32, 0.92);
+  color: #f5f7fb;
+  padding: 18px 18px 16px;
+  border-radius: 18px;
+  width: 360px;
+  max-width: calc(100vw - 40px);
+  text-align: left;
   position: relative;
-  animation: scaleIn 0.4s ease-out;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: toastIn 0.4s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
 }
 
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9) translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-12px, 12px); }
+  to { opacity: 1; transform: translate(0, 0); }
 }
 
 .close-btn {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: rgba(255, 255, 255, 0.2);
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.08);
   border: none;
-  color: white;
-  font-size: 2rem;
-  width: 40px;
-  height: 40px;
+  color: #fff;
+  font-size: 18px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.2s;
@@ -391,58 +387,59 @@ watch(() => route.query.q, resetState)
 }
 
 .close-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: rotate(90deg);
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .modal-content h1 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
+  font-size: 16px;
+  margin: 0 0 8px;
 }
 
 .modal-content p {
-  margin: 0.8rem 0;
+  margin: 0;
   line-height: 1.6;
-  font-size: 1rem;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .description {
   opacity: 0.9;
-  margin: 1.5rem auto;
+  margin-top: 6px;
 }
 
 .api-links {
   display: flex;
   gap: 0.8rem;
-  justify-content: center;
-  margin: 1.5rem 0;
+  justify-content: flex-start;
+  margin: 12px 0 0;
   flex-wrap: wrap;
 }
 
 .api-links code {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 4px 8px;
   border-radius: 8px;
   font-family: 'Consolas', monospace;
-  font-size: 0.85rem;
+  font-size: 12px;
+  color: #f5f7fb;
 }
 
 .enter-btn {
-  background: white;
-  color: #667eea;
+  background: linear-gradient(135deg, #ff7db7, #ff9ad0);
+  color: #1b0f1c;
   border: none;
-  padding: 1rem 2.5rem;
-  border-radius: 99px;
-  font-size: 1rem;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  margin-top: 1.5rem;
+  margin-top: 12px;
   transition: all 0.2s;
 }
 
 .enter-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 20px rgba(255, 125, 183, 0.25);
 }
 
 .enter-btn:active {
@@ -635,12 +632,6 @@ watch(() => route.query.q, resetState)
   }
   .masonry-column {
     gap: 8px;
-  }
-  .modal-content {
-    padding: 2rem 1.5rem;
-  }
-  .modal-content h1 {
-    font-size: 1.5rem;
   }
 }
 </style>

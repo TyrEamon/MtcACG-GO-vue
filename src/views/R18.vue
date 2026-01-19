@@ -7,15 +7,20 @@
       :style="{ backgroundImage: `url(/image/${filteredPosts[0].file_name})` }"
     ></div>
 
-    <!-- 里世界提示 -->
-    <NoticeToast
-      storage-key="mtcacg_r18_notice_v1"
-      title="🔞 成人内容提示"
-      :message="r18NoticeMessage"
-      :actions="r18NoticeActions"
-    />
+    <!-- 年龄确认遮罩 -->
+    <div class="warning-overlay" v-if="!confirmed">
+      <div class="warning-box" @click.stop>
+        <h1>🔞 成人内容警告</h1>
+        <p>你即将进入包含 R-18 内容的区域</p>
+        <p>请确认你已年满 18 周岁</p>
+        <div class="warning-actions">
+          <button @click="confirmAge" class="btn-confirm">我已满 18 岁</button>
+          <button @click="$router.push('/')" class="btn-cancel">返回首页</button>
+        </div>
+      </div>
+    </div>
 
-    <div class="r18-content">
+    <div v-if="confirmed" class="r18-content">
       <div class="content-header">
         <h1>🔞 里世界</h1>
         <p>但还是要保持绅士风度哦 (/ω＼)</p>
@@ -69,13 +74,13 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { useMasonry } from '../composables/useMasonry'
-import NoticeToast from '../components/NoticeToast.vue'
 
 const route = useRoute()
-const router = useRouter()
+
+const confirmed = ref(false)
 const posts = ref([])
 const loading = ref(false)
 
@@ -85,12 +90,6 @@ const hasMore = ref(true)
 const tipOpacity = ref(0)
 const tipText = ref('加载中...')
 const scrollSentinel = ref(null)
-
-const r18NoticeMessage = '本页包含 R-18 内容，浏览请确保已年满 18 周岁。'
-const r18NoticeActions = [
-  { label: '我知道了', variant: 'primary' },
-  { label: '返回首页', variant: 'ghost', onClick: () => router.push('/') }
-]
 
 const isLowEndDevice = ref(false)
 
@@ -283,6 +282,7 @@ const setupObserver = async () => {
 
   observer = new IntersectionObserver(
     (entries) => {
+      if (!confirmed.value) return
       if (entries[0]?.isIntersecting) {
         console.log('📍 R18 滚动哨兵触发')
         loadMore()
@@ -295,11 +295,22 @@ const setupObserver = async () => {
   console.log('✅ R18 IntersectionObserver 已启动')
 }
 
+const confirmAge = async () => {
+  confirmed.value = true
+  sessionStorage.setItem('r18_confirmed', 'true')
+  resetState()
+  await setupObserver()
+}
+
 onMounted(async () => {
   detectDevicePerformance()
   window.addEventListener('resize', handleResize)
-  resetState()
-  await setupObserver()
+
+  if (sessionStorage.getItem('r18_confirmed') === 'true') {
+    confirmed.value = true
+    resetState()
+    await setupObserver()
+  }
 })
 
 onUnmounted(() => {
@@ -307,8 +318,13 @@ onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
 })
 
+watch(confirmed, async (val) => {
+  if (val) await setupObserver()
+  else teardownObserver()
+})
+
 watch(() => route.query.q, () => {
-  resetState()
+  if (confirmed.value) resetState()
 })
 </script>
 
@@ -347,70 +363,76 @@ watch(() => route.query.q, () => {
 .warning-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(20px);
+  background: transparent;
+  backdrop-filter: none;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
+  align-items: flex-end;
+  justify-content: flex-start;
+  z-index: 900;
   animation: fadeIn 0.3s;
-  padding: 1rem;
+  padding: 20px;
 }
 
 .warning-box {
-  background: #fff;
-  padding: 3rem;
-  border-radius: 16px;
-  text-align: center;
-  max-width: 520px;
-  width: 100%;
-  animation: scaleIn 0.3s ease-out;
+  background: rgba(14, 20, 32, 0.92);
+  padding: 18px 18px 16px;
+  border-radius: 18px;
+  text-align: left;
+  width: 360px;
+  max-width: calc(100vw - 40px);
+  animation: toastIn 0.4s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
 }
 
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.92); }
-  to   { opacity: 1; transform: scale(1); }
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-12px, 12px); }
+  to { opacity: 1; transform: translate(0, 0); }
 }
 
 .warning-box h1 {
-  color: #ff4757;
-  margin-bottom: 1rem;
-  font-size: 2rem;
+  color: #f5f7fb;
+  margin-bottom: 8px;
+  font-size: 16px;
 }
 
 .warning-box p {
-  margin: 0.8rem 0;
-  color: #666;
-  font-size: 1rem;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 .warning-actions {
   display: flex;
   gap: 1rem;
-  margin-top: 2rem;
+  margin-top: 12px;
+  flex-wrap: wrap;
 }
 
 .btn-confirm, .btn-cancel {
-  flex: 1;
-  padding: 1rem;
+  flex: none;
+  padding: 8px 14px;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .btn-confirm {
-  background: #ff69b4;
-  color: white;
+  background: linear-gradient(135deg, #ff7db7, #ff9ad0);
+  color: #1b0f1c;
 }
-.btn-confirm:hover { background: #ff1493; }
+.btn-confirm:hover { transform: translateY(-1px); }
 
 .btn-cancel {
-  background: #f5f5f5;
-  color: #333;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
 }
-.btn-cancel:hover { background: #e0e0e0; }
+.btn-cancel:hover { background: rgba(255, 255, 255, 0.16); }
 
 /* 内容区 */
 .r18-content {
@@ -607,8 +629,6 @@ watch(() => route.query.q, () => {
   }
   .masonry-grid { gap: 8px; }
   .masonry-column { gap: 8px; }
-  .warning-box { padding: 2rem 1.5rem; }
-  .warning-box h1 { font-size: 1.5rem; }
 }
 </style>
 
