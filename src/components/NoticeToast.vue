@@ -1,7 +1,14 @@
 <template>
   <transition name="notice-slide">
     <div v-if="visible" class="notice-toast" role="status" aria-live="polite">
-      <div class="notice-card" @click.stop>
+      <div
+        class="notice-card"
+        @click.stop
+        @pointerenter="pauseAutoClose"
+        @pointerleave="resumeAutoClose"
+        @focusin="pauseAutoClose"
+        @focusout="resumeAutoClose"
+      >
         <button class="notice-close" type="button" @click="close" aria-label="Close">
           ×
         </button>
@@ -42,6 +49,8 @@ const props = defineProps({
 const visible = ref(false)
 const dismissed = ref(false)
 const isDesktop = ref(true)
+const autoCloseDelay = 3000
+let autoCloseTimer = null
 
 const lines = computed(() => {
   if (Array.isArray(props.message)) return props.message.filter(Boolean)
@@ -65,6 +74,10 @@ const loadDismissed = () => {
 }
 
 const close = () => {
+  if (autoCloseTimer) {
+    clearTimeout(autoCloseTimer)
+    autoCloseTimer = null
+  }
   visible.value = false
   dismissed.value = true
   if (typeof localStorage !== 'undefined') {
@@ -79,6 +92,27 @@ const handleAction = (action) => {
   close()
 }
 
+const scheduleAutoClose = () => {
+  if (!visible.value || dismissed.value || !isDesktop.value) return
+  if (autoCloseTimer) clearTimeout(autoCloseTimer)
+  autoCloseTimer = setTimeout(() => {
+    if (visible.value && !dismissed.value) {
+      close()
+    }
+  }, autoCloseDelay)
+}
+
+const pauseAutoClose = () => {
+  if (autoCloseTimer) {
+    clearTimeout(autoCloseTimer)
+    autoCloseTimer = null
+  }
+}
+
+const resumeAutoClose = () => {
+  scheduleAutoClose()
+}
+
 onMounted(() => {
   updateViewport()
   window.addEventListener('resize', updateViewport)
@@ -90,6 +124,15 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateViewport)
+  pauseAutoClose()
+})
+
+watch(visible, (val) => {
+  if (val) {
+    scheduleAutoClose()
+  } else {
+    pauseAutoClose()
+  }
 })
 
 watch(isDesktop, (val) => {
