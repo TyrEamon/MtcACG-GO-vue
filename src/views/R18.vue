@@ -164,8 +164,8 @@ const filteredPosts = computed(() => posts.value.filter(isR18Content))
 const getColumnCount = () => {
   const width = window.innerWidth
   if (width < 768) return 2
-  if (width < 1024) return 3
-  return 4
+  if (width < 1200) return 4
+  return 5
 }
 
 const columnCount = ref(getColumnCount())
@@ -414,9 +414,9 @@ watch(() => route.query.q, () => {
 
 /* 内容区 */
 .r18-content {
-  padding: 1rem;
+  padding: 0.5rem;
   padding-top: 18px;
-  max-width: 1600px;
+  max-width: none;
   margin: 0 auto;
 }
 
@@ -439,7 +439,7 @@ watch(() => route.query.q, () => {
 .masonry-container {
   width: 100%;
   margin: 0 auto;
-  padding: 0 8px;
+  padding: 0 clamp(4px, 0.8vw, 10px);
 }
 
 .masonry-grid {
@@ -602,7 +602,7 @@ watch(() => route.query.q, () => {
 /* 响应式 */
 @media (max-width: 768px) {
   .r18-content {
-    padding: 0.5rem;
+    padding: 0.35rem;
     padding-top: 10px;
   }
   .masonry-grid { gap: 8px; }
