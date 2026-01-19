@@ -7,20 +7,15 @@
       :style="{ backgroundImage: `url(/image/${filteredPosts[0].file_name})` }"
     ></div>
 
-    <!-- 年龄确认遮罩 -->
-    <div class="warning-overlay" v-if="!confirmed">
-      <div class="warning-box" @click.stop>
-        <h1>🔞 成人内容警告</h1>
-        <p>你即将进入包含 R-18 内容的区域</p>
-        <p>请确认你已年满 18 周岁</p>
-        <div class="warning-actions">
-          <button @click="confirmAge" class="btn-confirm">我已满 18 岁</button>
-          <button @click="$router.push('/')" class="btn-cancel">返回首页</button>
-        </div>
-      </div>
-    </div>
+    <!-- 里世界提示 -->
+    <NoticeToast
+      storage-key="mtcacg_r18_notice_v1"
+      title="🔞 成人内容提示"
+      :message="r18NoticeMessage"
+      :actions="r18NoticeActions"
+    />
 
-    <div v-if="confirmed" class="r18-content">
+    <div class="r18-content">
       <div class="content-header">
         <h1>🔞 里世界</h1>
         <p>但还是要保持绅士风度哦 (/ω＼)</p>
@@ -74,13 +69,13 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { useMasonry } from '../composables/useMasonry'
+import NoticeToast from '../components/NoticeToast.vue'
 
 const route = useRoute()
-
-const confirmed = ref(false)
+const router = useRouter()
 const posts = ref([])
 const loading = ref(false)
 
@@ -90,6 +85,12 @@ const hasMore = ref(true)
 const tipOpacity = ref(0)
 const tipText = ref('加载中...')
 const scrollSentinel = ref(null)
+
+const r18NoticeMessage = '本页包含 R-18 内容，浏览请确保已年满 18 周岁。'
+const r18NoticeActions = [
+  { label: '我知道了', variant: 'primary' },
+  { label: '返回首页', variant: 'ghost', onClick: () => router.push('/') }
+]
 
 const isLowEndDevice = ref(false)
 
@@ -163,8 +164,8 @@ const filteredPosts = computed(() => posts.value.filter(isR18Content))
 const getColumnCount = () => {
   const width = window.innerWidth
   if (width < 768) return 2
-  if (width < 1200) return 4
-  return 5
+  if (width < 1024) return 3
+  return 4
 }
 
 const columnCount = ref(getColumnCount())
@@ -282,7 +283,6 @@ const setupObserver = async () => {
 
   observer = new IntersectionObserver(
     (entries) => {
-      if (!confirmed.value) return
       if (entries[0]?.isIntersecting) {
         console.log('📍 R18 滚动哨兵触发')
         loadMore()
@@ -295,22 +295,11 @@ const setupObserver = async () => {
   console.log('✅ R18 IntersectionObserver 已启动')
 }
 
-const confirmAge = async () => {
-  confirmed.value = true
-  sessionStorage.setItem('r18_confirmed', 'true')
-  resetState()
-  await setupObserver()
-}
-
 onMounted(async () => {
   detectDevicePerformance()
   window.addEventListener('resize', handleResize)
-
-  if (sessionStorage.getItem('r18_confirmed') === 'true') {
-    confirmed.value = true
-    resetState()
-    await setupObserver()
-  }
+  resetState()
+  await setupObserver()
 })
 
 onUnmounted(() => {
@@ -318,13 +307,8 @@ onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
 })
 
-watch(confirmed, async (val) => {
-  if (val) await setupObserver()
-  else teardownObserver()
-})
-
 watch(() => route.query.q, () => {
-  if (confirmed.value) resetState()
+  resetState()
 })
 </script>
 
@@ -430,9 +414,9 @@ watch(() => route.query.q, () => {
 
 /* 内容区 */
 .r18-content {
-  padding: 0.5rem;
+  padding: 1rem;
   padding-top: 18px;
-  max-width: none;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
@@ -455,7 +439,7 @@ watch(() => route.query.q, () => {
 .masonry-container {
   width: 100%;
   margin: 0 auto;
-  padding: 0 clamp(4px, 0.8vw, 10px);
+  padding: 0 8px;
 }
 
 .masonry-grid {
@@ -618,7 +602,7 @@ watch(() => route.query.q, () => {
 /* 响应式 */
 @media (max-width: 768px) {
   .r18-content {
-    padding: 0.35rem;
+    padding: 0.5rem;
     padding-top: 10px;
   }
   .masonry-grid { gap: 8px; }
